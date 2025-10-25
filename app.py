@@ -14,63 +14,63 @@ st.set_page_config(
 st.markdown("""
     <style>
         body {
-            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-            color: white;
+            background: linear-gradient(135deg, #a8edea, #fed6e3);
+            color: #1a1a1a;
             font-family: 'Segoe UI', sans-serif;
         }
 
         .stApp {
-            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            background: linear-gradient(135deg, #a8edea, #fed6e3);
         }
 
         .main {
-            background: rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.6);
             padding: 2rem;
             border-radius: 20px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 25px rgba(0,0,0,0.2);
         }
 
         h1, h2, h3 {
-            color: #E3F2FD;
+            color: #004d40;
             text-align: center;
             font-weight: 600;
         }
 
         .stTextInput > div > div > input {
-            background-color: rgba(255,255,255,0.1);
-            color: white;
+            background-color: rgba(255,255,255,0.8);
+            color: #1a1a1a;
             border-radius: 10px;
         }
 
         .stFileUploader {
-            background-color: rgba(255,255,255,0.1);
+            background-color: rgba(255,255,255,0.7);
             padding: 1rem;
             border-radius: 10px;
         }
 
         .stButton > button {
-            background: linear-gradient(90deg, #00b09b, #96c93d);
+            background: linear-gradient(90deg, #56ab2f, #a8e063);
             color: white;
             border: none;
-            padding: 0.6rem 1.2rem;
+            padding: 0.7rem 1.4rem;
             border-radius: 10px;
             font-weight: bold;
             transition: 0.3s;
         }
 
         .stButton > button:hover {
-            background: linear-gradient(90deg, #96c93d, #00b09b);
+            background: linear-gradient(90deg, #a8e063, #56ab2f);
             transform: scale(1.03);
         }
 
         .stExpander {
-            background-color: rgba(255,255,255,0.08) !important;
+            background-color: rgba(255,255,255,0.7) !important;
             border-radius: 12px !important;
-            color: white !important;
+            color: #1a1a1a !important;
         }
 
         .stMarkdown {
-            color: white;
+            color: #1a1a1a;
         }
     </style>
 """, unsafe_allow_html=True)
@@ -146,4 +146,3 @@ else:
         st.warning("Por favor, sube una imagen antes de analizar.")
     if not api_key:
         st.warning("Por favor, ingresa tu clave API.")
-
