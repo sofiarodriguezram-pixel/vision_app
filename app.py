@@ -3,60 +3,116 @@ import streamlit as st
 import base64
 from openai import OpenAI
 
-# Function to encode the image to base64
+# ---------- CONFIGURACIÓN DE LA PÁGINA ----------
+st.set_page_config(
+    page_title="Análisis de Imagen 🤖🏞️",
+    layout="centered",
+    initial_sidebar_state="collapsed"
+)
+
+# ---------- ESTILOS VISUALES PERSONALIZADOS ----------
+st.markdown("""
+    <style>
+        body {
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .stApp {
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+        }
+
+        .main {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        h1, h2, h3 {
+            color: #E3F2FD;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .stTextInput > div > div > input {
+            background-color: rgba(255,255,255,0.1);
+            color: white;
+            border-radius: 10px;
+        }
+
+        .stFileUploader {
+            background-color: rgba(255,255,255,0.1);
+            padding: 1rem;
+            border-radius: 10px;
+        }
+
+        .stButton > button {
+            background: linear-gradient(90deg, #00b09b, #96c93d);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 10px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .stButton > button:hover {
+            background: linear-gradient(90deg, #96c93d, #00b09b);
+            transform: scale(1.03);
+        }
+
+        .stExpander {
+            background-color: rgba(255,255,255,0.08) !important;
+            border-radius: 12px !important;
+            color: white !important;
+        }
+
+        .stMarkdown {
+            color: white;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
+# ---------- FUNCIONES ----------
 def encode_image(image_file):
     return base64.b64encode(image_file.getvalue()).decode("utf-8")
 
+# ---------- INTERFAZ ----------
+st.title("🧠 Análisis de Imagen con IA")
 
-st.set_page_config(page_title="Analisis de imagen", layout="centered", initial_sidebar_state="collapsed")
-# Streamlit page setup
-st.title("Análisis de Imagen:🤖🏞️")
-ke = st.text_input('Ingresa tu Clave')
+ke = st.text_input('🔑 Ingresa tu Clave API')
 os.environ['OPENAI_API_KEY'] = ke
 
-
-# Retrieve the OpenAI API Key from secrets
 api_key = os.environ['OPENAI_API_KEY']
 
-# Initialize the OpenAI client with the API key
 client = OpenAI(api_key=api_key)
 
-# File uploader allows user to add their own image
-uploaded_file = st.file_uploader("Upload an image", type=["jpg", "png", "jpeg"])
+uploaded_file = st.file_uploader("📷 Sube una imagen", type=["jpg", "png", "jpeg"])
 
 if uploaded_file:
-    # Display the uploaded image
-    with st.expander("Image", expanded = True):
+    with st.expander("🖼️ Vista previa de la imagen", expanded=True):
         st.image(uploaded_file, caption=uploaded_file.name, use_container_width=True)
 
-# Toggle for showing additional details input
-show_details = st.toggle("Adiciona detalles sobre la imagen", value=False)
+show_details = st.toggle("📝 Agregar detalles adicionales", value=False)
 
 if show_details:
-    # Text input for additional details about the image, shown only if toggle is True
     additional_details = st.text_area(
-        "Adiciona contexto de la imagen aqui:",
+        "Escribe aquí contexto o detalles sobre la imagen:",
         disabled=not show_details
     )
 
-# Button to trigger the analysis
-analyze_button = st.button("Analiza la imagen", type="secondary")
+analyze_button = st.button("🔍 Analizar imagen")
 
-# Check if an image has been uploaded, if the API key is available, and if the button has been pressed
 if uploaded_file is not None and api_key and analyze_button:
-
-    with st.spinner("Analizando ..."):
-        # Encode the image
+    with st.spinner("🧩 Analizando..."):
         base64_image = encode_image(uploaded_file)
-    
-        prompt_text = ("Describe what you see in the image in spanish")
-    
+        prompt_text = "Describe lo que ves en la imagen en español."
+        
         if show_details and additional_details:
-            prompt_text += (
-                f"\n\nAdditional Context Provided by the User:\n{additional_details}"
-            )
-    
-        # Create the payload for the completion request - CORRECTED FORMAT
+            prompt_text += f"\n\nContexto adicional del usuario:\n{additional_details}"
+        
         messages = [
             {
                 "role": "user",
@@ -64,35 +120,30 @@ if uploaded_file is not None and api_key and analyze_button:
                     {"type": "text", "text": prompt_text},
                     {
                         "type": "image_url",
-                        "image_url": {
-                            "url": f"data:image/jpeg;base64,{base64_image}"
-                        }
+                        "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}
                     },
                 ],
             }
         ]
-    
-        # Make the request to the OpenAI API
+        
         try:
-            # Stream the response
             full_response = ""
             message_placeholder = st.empty()
             for completion in client.chat.completions.create(
-                model="gpt-4o", messages=messages,   
-                max_tokens=1200, stream=True
+                model="gpt-4o",
+                messages=messages,
+                max_tokens=1200,
+                stream=True
             ):
-                # Check if there is content to display
                 if completion.choices[0].delta.content is not None:
                     full_response += completion.choices[0].delta.content
                     message_placeholder.markdown(full_response + "▌")
-            # Final update to placeholder after the stream ends
             message_placeholder.markdown(full_response)
-    
         except Exception as e:
-            st.error(f"An error occurred: {e}")
+            st.error(f"Ocurrió un error: {e}")
 else:
-    # Warnings for user action required
     if not uploaded_file and analyze_button:
-        st.warning("Please upload an image.")
+        st.warning("Por favor, sube una imagen antes de analizar.")
     if not api_key:
-        st.warning("Por favor ingresa tu API key.")
+        st.warning("Por favor, ingresa tu clave API.")
+
